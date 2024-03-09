@@ -1,0 +1,14 @@
+.grid-wrapper {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr); 
+  grid-template-rows: repeat(6, 1fr);
+  gap: 1px;
+  background-color: #484848;
+
+  .cell_wrapper {
+    min-width: 140px;
+    min-height: 130px;
+    background-color: #1e1f21;
+    color: #dddcdd;
+  }
+}
