@@ -64,7 +64,7 @@ export default function Main() {
         const day_events = events.filter(event => event.date === temp_current_day.format('YYYY-MM-DD'))
         temp_calendar.push({
           day: temp_current_day.clone(),
-          items: items.filter(item => item.day_id === temp_current_day.format('YYYY-MM-DD')),
+          items: items.filter(item => item.day_id === temp_current_day.format('YYYY-MM-DD')).sort((a, b) => a.index - b.index),
           day_id: temp_current_day.format('YYYY-MM-DD'),
           events: day_events.length ? day_events : null,
         })
@@ -75,7 +75,7 @@ export default function Main() {
     })()
   }, [month])
 
-  console.log(calendar)
+  // console.log(calendar)
   return (
     <div>
       <Header setLabels={setLabels}></Header>
