@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Param, Post } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
 import { CreateItemDto, ItemService, UpdateItemDto } from "./item.service";
+import * as moment from 'moment';
 
 @Controller('items')
 export class ItemController {
@@ -16,7 +17,8 @@ export class ItemController {
   }
 
   @Get()
-  async findAll() {
-    return this.itemService.findAll();
+  async findAll(@Query('start_day') start_day: string, @Query('end_day') end_day: string) {
+    // return this.itemService.findAll(start_day, end_day);
+    return this.itemService.findAll(moment(start_day), moment(end_day));
   }
 }

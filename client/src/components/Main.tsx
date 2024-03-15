@@ -2,44 +2,18 @@ import React, { useEffect, useMemo, useState } from 'react'
 import moment from 'moment'
 import Header from './Header'
 import Grid from './Grid'
-
-import { START_DAY, END_DAY, DAY_FORMAT_PATTERN } from '../constants'
-
-moment.updateLocale('en', { week: { dow: 1 } })
-export type ItemsType = {
-  id: string
-  name: string,
-  day_id: string,
-  index: number,
-  label_id: string | null,
-}
-
-export type EventType = {
-  day_id: string,
-  name: string
-}
-
-export type DayType = {
-  day: moment.Moment,
-  items: ItemsType[],
-  day_id: string,
-  events: EventType[] | null,
-}
-
-export type LabelType = {
-  id: string,
-  name: string,
-  color: string,
-}
+import './index.scss'
+import { DayType, ItemsType, LabelType, SERVER_URL } from './Types'
+import { CSSTransition } from 'react-transition-group'
 
 export default function Main() {
   const [month, setMonth] = useState(moment)
   const [calendar, setCalendar] = useState<DayType[]>([])
   const [labels, setLabels] = useState<LabelType[]>([])
-
+  
   const START_DAY = useMemo(() => moment(month).startOf('month').startOf('week'), [month])
-  const temp_END_DAY = useMemo(() => moment().endOf('month').endOf('week'), [month])
-  const temp_days_difference = useMemo(() => temp_END_DAY.diff(START_DAY, 'days'), [month, calendar])
+  const temp_END_DAY = useMemo(() => moment(month).endOf('month').endOf('week'), [month])
+  const temp_days_difference = useMemo(() => temp_END_DAY.diff(START_DAY, 'days'), [START_DAY, temp_END_DAY.date()])
   if (temp_days_difference + 1 === 28) {
     temp_END_DAY.add(1, 'week')
   }
@@ -53,10 +27,11 @@ export default function Main() {
       const data = (await fetch('https://date.nager.at/api/v3/PublicHolidays/2024/ua'))
       const events: any[] = await data.json()
 
-      const items_request = (await fetch('http://localhost:8080/items'))
+      const items_request = (await fetch(`${SERVER_URL}/items?start_day=${START_DAY.startOf('day').format('YYYY-MM-DD')}&end_day=${END_DAY.endOf('day').format('YYYY-MM-DD')}`))
       const items: ItemsType[] = await items_request.json() || []
-      const labels_request = (await fetch('http://localhost:8080/labels'))
+      const labels_request = (await fetch(`${SERVER_URL}/labels`))
       const labels: LabelType[] = await labels_request.json() || []
+      setLabels(labels)
 
       let temp_current_day = START_DAY.clone()
       const temp_calendar = []
@@ -75,11 +50,11 @@ export default function Main() {
     })()
   }, [month])
 
-  // console.log(calendar)
   return (
     <div>
-      <Header setLabels={setLabels}></Header>
-      <Grid labels={labels} calendar={calendar} setCalendar={setCalendar}></Grid>
+      <Header setLabels={setLabels} month={month} setMonth={setMonth}></Header>
+
+      <Grid labels={labels} calendar={calendar} setCalendar={setCalendar} month={month}></Grid>
     </div>
   )
 }

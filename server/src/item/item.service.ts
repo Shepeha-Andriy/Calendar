@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import * as moment from 'moment';
 import { Model } from 'mongoose';
 import { Item } from './schema';
 
@@ -37,7 +38,13 @@ export class ItemService {
     return true
   }
 
-  async findAll(): Promise<Item[]> {
-    return this.itemModel.find().exec();
+  async findAll(start_day: moment.Moment = moment().startOf('month').startOf('week'), end_day: moment.Moment = moment().endOf('month').endOf('week')): Promise<Item[]> {
+    const days = []
+    let temp_current_day = start_day.clone()
+    while (!temp_current_day.isAfter(end_day)) {
+      days.push(temp_current_day.format('YYYY-MM-DD'))
+      temp_current_day = temp_current_day.add(1, 'day')
+    }
+    return this.itemModel.find({ day_id: days }).exec();
   }
 }
